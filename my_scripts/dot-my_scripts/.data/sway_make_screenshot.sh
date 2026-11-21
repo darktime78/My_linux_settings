@@ -24,16 +24,13 @@ DATE=$(date +"%Y-%m-%d-%H-%M-%S")
 NAME=${DATE}_${RES}_grim.png
 
 DIRECTORY="Screenshots"
-if [[ ! -d ~/$DIRECTORY ]]; then
-	mkdir ~/Screenshots
-fi
+mkdir -p ~/$DIRECTORY
 
 if [[ -z $1 ]]; then
 	grim ~/$DIRECTORY/$NAME
-	cat ~/$DIRECTORY/$NAME | wl-copy
-	notify-send "Screenshot" "Image $NAME was created!"
 else
 	grim -g "$SHAPE" ~/$DIRECTORY/$NAME
-	cat ~/$DIRECTORY/$NAME | wl-copy
-	notify-send "Screenshot" "Image $NAME was created!"
 fi
+
+wl-copy --type image/png < ~/$DIRECTORY/$NAME
+notify-send -i ~/$DIRECTORY/$NAME "Screenshot" "$NAME saved and copied to clipboard"

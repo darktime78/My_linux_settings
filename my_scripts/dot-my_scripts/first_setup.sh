@@ -2,8 +2,8 @@
 
 ## /etc/locale.gen
 echo Setup /etc/locale.gen
-sed -ie 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
-sed -ie 's/^#ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen
+sed -i -e 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+sed -i -e 's/^#ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen > /dev/null
 echo Setup!
 
@@ -32,12 +32,12 @@ echo Setup!
 
 ## Setup color pacman
 echo Setup color pacman
-sed -ie 's/^#Color/Color\nILoveCandy/' /etc/pacman.conf
+sed -i -e 's/^#Color/Color\nILoveCandy/' /etc/pacman.conf
 echo Setup!
 
 ## Enable multilib in pacman
 echo Setup multilib pacman
-sed -ie 's/^#\[multilib\]/\[multilib\]\nInclude = \/etc\/pacman.d\/mirrorlist/' /etc/pacman.conf
+sed -i -e 's/^#\[multilib\]/\[multilib\]\nInclude = \/etc\/pacman.d\/mirrorlist/' /etc/pacman.conf
 echo Setup!
 
 ## Update DB

@@ -45,14 +45,19 @@ Install the necessary applications for the **sway** environment
 ```bash
 $ ./check_sway.sh
 ```
+### Battery and power saving (laptop)
+Enable power-profiles-daemon and a few safe power saving tweaks. Every step asks first.
+```bash
+# ./setup_power.sh
+```
 ### Status bar setup
-The last thing you must do is to compile some applications:
-- application for drawing information blocks in the status bar ( C )
-- applications to keep track of an independent keyboard layout for each application on the system ( go )
+The bar is waybar with native modules only (no polling scripts), so nothing needs to be compiled for it.
+To build the application that keeps an independent keyboard layout for each window ( go ):
 ```bash
 $ cd ~/.my_scripts/.data/binary
-$ make
+$ make independent_layout
 ```
+(`make` without arguments also builds the old C helper used by the i3 status bar.)
 ## Additional configuration
 ### Wallpaper
 If you don't have your own image for the wallpaper, you can use the default wallpaper.
@@ -65,11 +70,34 @@ Or if you have a different screen size, you can see a list of all available wall
 $ yay -Ql sway | grep '.png'
 ```
 ### Status bar
-Currently swaybar has one problem, the path to the startup script must be full, the relative path does not work.
-You must change the path in ~/.config/sway/config in the bar section to your username.
-This section looks like this:
-```
-bar {
-    swaybar_command /home/harddie/.config/sway/start_waybar.sh
-}
-```
+* Config: `~/.config/sway/waybar.conf`, style: `~/.config/sway/style.css` (style changes are picked up automatically).
+* Restart the bar after editing the config: `$mod+Shift+b`. Log: `$XDG_RUNTIME_DIR/waybar.log`.
+* Clickable: volume (click = mute, right click = mixer, scroll = volume), brightness (scroll),
+  network (click = show traffic), power profile (click = next profile), clock (hover = calendar),
+  eye icon = keep the screen on (disables auto lock).
+
+### Idle and sleep
+| Idle time | Action |
+|---|---|
+| 4 min | dim the screen |
+| 5 min | lock |
+| 5.5 min | screen off |
+| 15 min | suspend, **only on battery** |
+
+The screen is always locked before suspend. Fullscreen windows (video, games) and the eye icon in the bar prevent all of it.
+Timeouts are in the `swayidle` block of `~/.config/sway/config`.
+
+### Useful shortcuts
+| Keys | Action |
+|---|---|
+| `$mod+d` / `Alt+F2` | application launcher |
+| `$mod+Shift+d` | run a command |
+| `Alt+Tab` | window switcher |
+| `$mod+Shift+e` | power menu (lock / suspend / log out / reboot / power off) |
+| `Ctrl+Alt+Shift+l` | lock |
+| `Ctrl+Alt+Shift+s` | suspend |
+| `$mod+m` | show / hide the bar |
+| `$mod+Shift+b` | restart the bar |
+| `$mod+n` | do not disturb on / off |
+| `Ctrl+Shift+Space` / `$mod+Shift+n` | dismiss all / restore last notification |
+| `F12` / `Shift+F12` / `Ctrl+F12` | screenshot: screen / window / area (saved to ~/Screenshots and copied) |

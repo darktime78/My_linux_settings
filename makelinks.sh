@@ -18,3 +18,4 @@ stow --dotfiles -t "$HOME/.config" sway
 stow --dotfiles -t "$HOME/.config" docker
 stow --dotfiles -t "$HOME/.config" tmux-theme
 stow --dotfiles -t "$HOME/.config" mako
+stow --dotfiles -t "$HOME/.config" rofi

@@ -1,24 +1,44 @@
 #!/bin/bash
+#
+# Start waybar and restart it if it crashes or is killed
+# ("pkill -x waybar" = restart the bar with the new config).
+#
+# Quick repeated failures (e.g. a typo in waybar.conf) back off and finally
+# give up with a notification, instead of spinning in a busy loop that
+# burns CPU and battery.
 
-set -e
+CONFIG="$HOME/.config/sway/waybar.conf"
+STYLE="$HOME/.config/sway/style.css"
+RUNDIR="${XDG_RUNTIME_DIR:-/tmp}"
+LOG="$RUNDIR/waybar.log"
 
-function sig()
-{
-	echo "Trap"
-}
+# Only one wrapper per session
+exec 9>"$RUNDIR/waybar-wrapper.lock"
+flock -n 9 || exit 0
 
-trap sig RTMIN+1
-trap sig RTMIN+2
-trap sig RTMIN+3
+: >"$LOG"
+fails=0
 
-while true; do
-	echo "$(date) Starting waybar..." >>/tmp/waybar.log
-	USERID=$(id -u)
-	SOCK=$(ls /run/user/${USERID}/sway-ipc.*.sock)
-	{
-		SWAYSOCK=${SOCK} waybar -c ~/.config/sway/waybar.conf -s ~/.config/sway/style.css $@ 2>>/tmp/waybar.log
-	} || {
-		echo "Got error $?"
-	}
-	echo "$(date) Waybar were closed with code: $?" >>/tmp/waybar.log
+while :; do
+	# Stop when the sway session is gone
+	[[ -n $SWAYSOCK && -S $SWAYSOCK ]] || break
+
+	started=$SECONDS
+	echo "$(date '+%F %T') starting waybar" >>"$LOG"
+	waybar -c "$CONFIG" -s "$STYLE" "$@" >>"$LOG" 2>&1 9>&-
+	code=$?
+	echo "$(date '+%F %T') waybar exited with code $code" >>"$LOG"
+
+	if (( SECONDS - started < 10 )); then
+		(( fails++ ))
+	else
+		fails=0
+	fi
+
+	if (( fails >= 5 )); then
+		notify-send -u critical "Waybar keeps crashing" "See $LOG"
+		break
+	fi
+
+	sleep $(( fails * 2 + 1 ))
 done
