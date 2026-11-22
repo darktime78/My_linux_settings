@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# There is no browser in the container. Neovim opens flamegraph SVGs (and
+# links) with xdg-open, so instead copy the host path / URL to the
+# clipboard (Wayland socket is shared) and show where it is.
+
+target=$1
+# /home/user/Projects/... inside == $HOST_PROJECTS/... on the host
+if [[ -n $HOST_PROJECTS && $target == /home/user/Projects* ]]; then
+	target="$HOST_PROJECTS${target#/home/user/Projects}"
+fi
+
+if [[ -n $WAYLAND_DISPLAY ]] && command -v wl-copy >/dev/null; then
+	printf '%s' "$target" | wl-copy 2>/dev/null
+	msg="copied to clipboard"
+else
+	msg="open it on the host"
+fi
+echo "No browser in the container, $msg: $target" >&2
+exit 0

@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# Check the connection to the local AI servers from inside the container.
+
+: "${LOCALAI_URL:=http://127.0.0.1:8080}"
+: "${LOCALAI_FIM_URL:=http://127.0.0.1:8012}"
+ok() { printf '  \e[32mok\e[0m   %s\n' "$*"; }
+bad() { printf '  \e[31mfail\e[0m %s\n' "$*"; }
+
+echo "== servers (shared host network)"
+for s in "autocomplete:$LOCALAI_FIM_URL" "router:$LOCALAI_URL"; do
+	name=${s%%:*} url=${s#*:}
+	if [[ $(curl -s -o /dev/null -w '%{http_code}' -m 3 "$url/health") == 200 ]]; then
+		ok "$name  $url"
+	else
+		bad "$name  $url  (localai start)"
+	fi
+done
+
+echo "== router models"
+curl -fsS -m 3 "$LOCALAI_URL/models" 2>/dev/null |
+	jq -r '(.data // .models // [])[] | "  \(.id)  \(.status.value // .status // "" | tostring)"' 2>/dev/null ||
+	echo "  (none)"
+
+echo "== control socket (localai on the host)"
+if [[ -S /run/localai-ctl/ctl.sock ]]; then
+	ok "/run/localai-ctl/ctl.sock  -> try: localai status"
+else
+	bad "missing: on the host  systemctl --user enable --now localai-ctl"
+fi
+
+echo "== OpenCode"
+for f in ~/.config/opencode/opencode.jsonc ~/.config/opencode/opencode.json; do
+	[[ -e $f ]] && ok "$f  ($(opencode --version 2>/dev/null))"
+done
+[[ -x ~/.local/bin/cpp-report ]] && ok "cpp-report" || bad "cpp-report not mounted (/test /build need it)"
+
+echo "== live autocomplete test (/infill)"
+resp=$(curl -fsS -m 30 "$LOCALAI_FIM_URL/infill" -H 'Content-Type: application/json' \
+	-d '{"input_prefix":"int add(int a, int b) {\n    ","input_suffix":"\n}\n","n_predict":16,"cache_prompt":false}' 2>/dev/null)
+if [[ -n $resp ]]; then
+	printf '%s' "$resp" | jq -r '"  suggestion: " + ((.content // "") | gsub("\n"; "⏎")),
+		"  \(.timings.predicted_per_second // 0 | floor) tok/s"'
+else
+	bad "no answer from $LOCALAI_FIM_URL/infill"
+fi

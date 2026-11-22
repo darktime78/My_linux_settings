@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# `localai` inside the nvim-cpp container.
+#
+# The servers run on the host as systemd user services, and systemctl / journalctl /
+# nvidia-smi / llama-server don't exist in here. So this sends the command to the host's
+# control socket (localai-ctl.service from arch-local-ai), which runs the real `localai`
+# for an allowlisted set of commands and streams the output back.
+#
+#   localai status | models | devices | doctor | start [dev|battery] | stop | restart
+#           load|unload qwen-agent|qwen-chat|qwen-code | gpu [MODE] | logs [fim|router]
+#           bench [agent|chat|fim] | chat
+
+SOCK="${LOCALAI_CTL_SOCKET:-/run/localai-ctl/ctl.sock}"
+
+if [[ ! -S $SOCK ]]; then
+	echo "localai: no control socket at $SOCK" >&2
+	echo "  on the host: systemctl --user enable --now localai-ctl   (then restart this container)" >&2
+	exit 1
+fi
+
+# One line out, then stream the answer until the host closes the connection.
+printf '%s\n' "$*" | exec socat -t 86400 - "UNIX-CONNECT:$SOCK"
