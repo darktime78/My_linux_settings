@@ -11,12 +11,18 @@ logout=$'  Log out'
 reboot=$'  Reboot'
 poweroff=$'  Power off'
 
+# Use your own rofi theme "power" if you have one
+THEME=()
+for t in ~/.config/rofi/power.rasi ~/.local/share/rofi/themes/power.rasi; do
+	[[ -f $t ]] && THEME=(-theme power) && break
+done
+
 confirm() {
-	[[ $(printf 'No\nYes\n' | rofi -dmenu -i -no-custom -p "$1?") == Yes ]]
+	[[ $(printf 'No\nYes\n' | rofi -dmenu -i -no-custom "${THEME[@]}" -p "$1?") == Yes ]]
 }
 
 choice=$(printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff" |
-	rofi -dmenu -i -no-custom -p "Power")
+	rofi -dmenu -i -no-custom "${THEME[@]}" -p "Power")
 
 case $choice in
 "$lock") exec "$LOCK" ;;

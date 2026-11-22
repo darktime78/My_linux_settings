@@ -1,165 +1,80 @@
 /*
- * Waybar style. Same palette as the old powerline blocks, drawn as
- * rounded "pills". No animations or transitions: every animation frame is
- * a redraw and costs battery.
+ * Waybar style for both bars. Module colours live in waybar.conf
+ * (powerline Pango spans), this file only sets fonts and workspaces.
+ * No transitions/animations: every animation frame is a redraw.
  */
 
 * {
+    padding: 0 0;
     border: none;
     border-radius: 0;
+    /* FontAwesome / Nerd Font only as fallback for the icons and arrows */
+    font-family: "Hack", "Hack Nerd Font", "FontAwesome", monospace;
+    font-size: 12px;
     min-height: 0;
-    font-family: "Cantarell", "CaskaydiaCove Nerd Font", "FontAwesome", sans-serif;
-    font-size: 15px;
 }
 
 window#waybar {
     background: #2f343f;
-    color: #eef6eb;
+    color: #ffffff;
 }
 
 tooltip {
     background: #2f343f;
     border: 1px solid #64727d;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 tooltip label {
     color: #eef6eb;
 }
 
-/* ------------------------------------------------------------ workspaces */
-
+/* Parallelogram workspace buttons (tilted left). The shape itself is drawn in waybar.conf
+ * (Pango markup); here only opacity and text colour change per state. */
 #workspaces button {
-    padding: 0 6px;
+    padding: 0;
     background: transparent;
-    color: #8a8f96;
-    border-bottom: 3px solid transparent;
-}
-
-#workspaces button:hover {
-    background: rgba(255, 255, 255, 0.08);
+    color: #c5c8c6;
+    opacity: 0.55;
+    border: none;
     box-shadow: none;
     text-shadow: none;
 }
 
+#workspaces button:hover {
+    background: transparent;
+    opacity: 0.85;
+}
+
+#workspaces button.visible {
+    opacity: 0.75;
+}
+
 #workspaces button.focused {
-    background: #64727d;
+    opacity: 1;
     color: #ffffff;
-    border-bottom: 3px solid #ffffff;
+    font-weight: bold;
 }
 
 #workspaces button.urgent {
-    background: #eb4d4b;
-    color: #ffffff;
+    opacity: 1;
+    color: #ff5252;
+    font-weight: bold;
 }
 
 #mode {
     background: #eb4d4b;
-    padding: 0 10px;
+    padding: 0 6px;
 }
 
-/* --------------------------------------------------------------- modules */
-
-#scratchpad,
-#mpd,
-#idle_inhibitor,
-#pulseaudio,
-#backlight,
-#network,
-#bluetooth,
-#cpu,
-#memory,
-#disk,
-#power-profiles-daemon,
-#battery,
-#language,
-#clock,
-#tray {
-    padding: 0 9px;
-    margin: 3px 0;
-    border-radius: 8px;
-    color: #eef6eb;
-}
-
-/* Media / sound / power: green */
-#mpd, #pulseaudio, #backlight, #battery, #power-profiles-daemon, #idle_inhibitor {
-    background: #4d504e;
-    box-shadow: inset 3px 0 #597262;
-}
-
-/* Network: plum */
-#network, #bluetooth {
-    background: #4e3c43;
-    box-shadow: inset 3px 0 #6e4555;
-}
-
-/* System: blue-grey */
-#cpu, #memory, #disk, #scratchpad {
-    background: #3b4549;
-    box-shadow: inset 3px 0 #445d67;
-}
-
-/* Keyboard layout: olive */
-#language {
-    background: #626059;
-    box-shadow: inset 3px 0 #8b8367;
-    min-width: 40px;
-}
-
-/* Clock: terracotta */
-#clock {
-    background: #8e665d;
-    box-shadow: inset 3px 0 #c77a69;
+#scratchpad {
+    padding: 0 6px;
 }
 
 #tray {
-    background: transparent;
-    margin-right: 4px;
+    padding: 0 4px;
 }
 
 #tray > .needs-attention {
     background: #eb4d4b;
-}
-
-/* ---------------------------------------------------------------- states */
-
-#mpd.paused,
-#pulseaudio.muted,
-#bluetooth.off,
-#idle_inhibitor.deactivated {
-    color: #9aa0a6;
-}
-
-#idle_inhibitor.activated {
-    background: #c77a69;
-    box-shadow: none;
-}
-
-#network.disconnected {
-    color: #ff8a80;
-}
-
-#cpu.warning, #memory.warning,
-#battery.warning:not(.charging) {
-    color: #ffcc66;
-}
-
-#cpu.critical, #memory.critical, #disk.critical,
-#battery.critical:not(.charging) {
-    background: #e53935;
-    box-shadow: none;
-    color: #ffffff;
-}
-
-#battery.charging, #battery.plugged {
-    color: #b9f6ca;
-}
-
-#power-profiles-daemon.performance {
-    background: #8e665d;
-    box-shadow: inset 3px 0 #c77a69;
-}
-
-#power-profiles-daemon.power-saver {
-    color: #b9f6ca;
 }

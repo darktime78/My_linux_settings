@@ -1,91 +1,93 @@
-/*
- * rofi launcher (rofi >= 1.7, native Wayland since 2.0).
- * The old command line colour options (-color-window, -width, -lines ...)
- * were removed from rofi, so the look now lives here.
- */
-
 configuration {
-    modi: "drun,run,window";
-    show-icons: true;
-    font: "Cantarell 13";
-    drun-display-format: "{name}";
-    display-drun: "Apps";
-    display-run: "Run";
-    display-window: "Windows";
-    matching: "fuzzy";
-    sort: true;
+  modi: "window,run,drun,emoji,calc";
+  show-icons: true;
+  font: "Hack 11";
+  terminal: "alacritty";
+  drun-display-format: "{name}";
+  display-drun: "Applications:";
+  display-run: "Run:";
+  display-window: "Windows:";
+  display-emoji: "Emoji:";
+  display-calc: "Calc:";
+  matching: "fuzzy";
+  sort: true;
 }
 
-* {
-    bg:     #2f343ff2;
-    bg-alt: #3b4049;
-    fg:     #ebebeb;
-    dim:    #8a8f96;
-    accent: #005577;
+@theme "/dev/null"
 
-    background-color: transparent;
-    text-color:       @fg;
+* {
+  bg: #1e1e2e66;
+  bg-alt: #585b7066;
+  bg-selected: #31324466;
+
+  fg: #cdd6f4;
+  fg-alt: #7f849c;
+
+  border: 0;
+  margin: 0;
+  padding: 0;
+  spacing: 0;
 }
 
 window {
-    location:         north;
-    anchor:           north;
-    y-offset:         80px;
-    width:            560px;
-    background-color: @bg;
-    border-radius:    12px;
-    padding:          12px;
-}
-
-mainbox {
-    spacing: 10px;
-}
-
-inputbar {
-    children:         [ prompt, entry ];
-    spacing:          10px;
-    padding:          8px 10px;
-    background-color: @bg-alt;
-    border-radius:    8px;
-}
-
-prompt {
-    text-color: @dim;
-}
-
-entry {
-    placeholder:       "Type to search";
-    placeholder-color: @dim;
-}
-
-listview {
-    lines:        8;
-    fixed-height: false;
-    scrollbar:    false;
-    spacing:      2px;
+  width: 30%;
+  background-color: @bg;
 }
 
 element {
-    padding:       6px 10px;
-    spacing:       10px;
-    border-radius: 6px;
+  padding: 8 12;
+  background-color: transparent;
+  text-color: @fg-alt;
 }
 
-element selected.normal {
-    background-color: @accent;
-}
-
-element-icon {
-    size:             1.3em;
-    background-color: inherit;
+element selected {
+  text-color: @fg;
+  background-color: @bg-selected;
 }
 
 element-text {
-    background-color: inherit;
-    text-color:       inherit;
-    vertical-align:   0.5;
+  background-color: transparent;
+  text-color: inherit;
+  vertical-align: 0.5;
 }
 
-message {
-    padding: 6px 10px;
+element-icon {
+  size: 14;
+  padding: 0 10 0 0;
+  background-color: transparent;
 }
+
+entry {
+  padding: 12;
+  background-color: @bg-alt;
+  text-color: @fg;
+  placeholder: "Type to search";
+  placeholder-color: @fg-alt;
+}
+
+inputbar {
+  children: [prompt, entry];
+  background-color: @bg;
+}
+
+listview {
+  background-color: @bg;
+  columns: 1;
+  lines: 10;
+  fixed-height: false;
+}
+
+mainbox {
+  children: [inputbar, listview];
+  background-color: @bg;
+}
+
+prompt {
+  enabled: true;
+  padding: 12 0 12 12;
+  vertical-align: 0.5;
+  background-color: @bg-alt;
+  text-color: @fg;
+}
+
+/* vim: ft=sass */

@@ -43,7 +43,7 @@ if ! swaylock -f "${image[@]}" \
 	--inside-ver-color=$passwordCorrect --inside-wrong-color=$passwordIncorrect \
 	--ring-ver-color=$foreground --ring-wrong-color=$foreground \
 	--indicator-radius=40 --indicator-thickness=4 \
-	--text-ver-color=$foreground; then
+	--text-ver-color=$foreground --font=Hack; then
 	restore_notifications
 	exit 1
 fi

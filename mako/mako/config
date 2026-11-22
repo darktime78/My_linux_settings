@@ -4,7 +4,7 @@
 
 anchor=bottom-right
 layer=overlay
-font=Cantarell 11
+font=Hack 10
 background-color=#2F343FCF
 text-color=#eef6ebFF
 border-size=0

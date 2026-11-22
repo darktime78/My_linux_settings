@@ -8,7 +8,7 @@ opacity = 0.8
 history = 0
 
 [font]
-size = 11.0
+size = 10.0
 
 [font.normal]
 family = "Hack"

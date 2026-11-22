@@ -4,7 +4,8 @@
 
 set $mod Mod4
 
-# Plain names; the icons are drawn by waybar (sway/workspaces in waybar.conf)
+# Plain names. The icons are added by waybar (sway/workspaces in waybar.conf):
+# Pango markup inside a workspace name is shown by waybar as raw text.
 set $wspace1  "1"
 set $wspace2  "2"
 set $wspace3  "3"
@@ -26,7 +27,7 @@ set $text-color          #ebebeb
 set $Scripts ~/.my_scripts/.data
 set $Locker ~/.my_scripts/.data/sway_start_lockscreen.sh
 
-set $Font "Cantarell" 13px
+set $Font Hack 9
 
 
 ##
@@ -39,6 +40,11 @@ font pango:$Font
 ##
 # Mode setup
 ##
+
+set $LCD eDP-1
+# --reload: correct state after "reload" too, --locked: works on the lock screen
+bindswitch --reload --locked lid:on output $LCD disable
+bindswitch --reload --locked lid:off output $LCD enable
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -77,12 +83,15 @@ bindsym --to-code Ctrl+Mod1+t exec alacritty
 # kill focused window
 bindsym --to-code Ctrl+Shift+q kill
 
-# application launcher (look: ~/.config/rofi/config.rasi)
+# application launcher. The old -width/-lines/-color-* flags were removed
+# from rofi; the look now lives in ~/.config/rofi/config.rasi
 bindsym --to-code Mod1+F2 exec rofi -show drun
 bindsym --to-code $mod+d exec rofi -show drun
 # run any command / switch between open windows
 bindsym --to-code $mod+Shift+d exec rofi -show run
 bindsym --to-code Mod1+Tab exec rofi -show window
+# docker apps: start / stop the containers from ~/.config/docker/dockerfunc
+bindsym --to-code $mod+c exec $Scripts/rofi_docker_menu.sh
 
 
 # Make the currently focused window a scratchpad
@@ -122,7 +131,9 @@ bindsym --to-code $mod+e layout toggle split
 bindsym --to-code $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym --to-code $mod+space focus mode_toggle
+# ($mod+space is the keyboard layout switch, xkb_options grp:win_space_toggle,
+#  so binding it here made Win+Space switch layout AND jump focus)
+bindsym --to-code $mod+Tab focus mode_toggle
 
 # switch to workspace
 bindsym --to-code $mod+1 workspace $wspace1
@@ -148,9 +159,10 @@ bindsym --to-code $mod+Shift+8 move container to workspace $wspace8
 bindsym --to-code $mod+Shift+9 move container to workspace $wspace9
 bindsym --to-code $mod+Shift+0 move container to workspace $wspace10
 
-# reload sway config (waybar reloads its style.css by itself)
+# reload sway config (waybar reloads style.css by itself)
 bindsym --to-code $mod+Shift+r reload
-# power menu: lock / suspend / log out / reboot / power off
+# power menu: lock / suspend / log out / reboot / power off (asks to confirm)
+# uses your rofi theme "power" if it exists
 bindsym --to-code $mod+Shift+e exec $Scripts/sway_power_menu.sh
 
 mode "resize" {
@@ -170,44 +182,95 @@ mode "resize" {
 
 bindsym --to-code $mod+r mode "resize"
 
-# bar toggle (show / hide)
-bindsym --to-code $mod+m exec pkill -x -SIGUSR1 waybar
-# bar restart (re-reads waybar.conf; the start script launches it again)
-bindsym --to-code $mod+Shift+b exec pkill -x waybar
+# bars: show / hide both (works even if the bar is not running)
+bindsym --to-code $mod+m exec ~/.config/sway/bar.sh toggle
+# bars: restart (re-reads waybar.conf)
+bindsym --to-code $mod+Shift+m exec ~/.config/sway/bar.sh restart
 
 
 ##
 # Bar
-# Config: ~/.config/sway/waybar.conf, log: $XDG_RUNTIME_DIR/waybar.log
+# One waybar process draws both bars (top + bottom), see waybar.conf.
+# Log: $XDG_RUNTIME_DIR/waybar.log
 ##
 
-exec ~/.config/sway/start_waybar.sh
+exec ~/.config/sway/bar.sh start
 
 ##
 # Window association
 # Get info: swaymsg -t get_tree
 ##
-assign [class="waterfox-current"] $wspace1
-assign [class="Waterfox"] $wspace1
-assign [app_id="termite"] $wspace2
+# Matches are regular expressions; (?i) = ignore case.
+# Docker apps get the same app_id/class as the normal ones, so they land
+# on the same workspace.
+
+# 1 - browser
+assign [app_id="(?i)firefox"] $wspace1
+assign [class="(?i)firefox"] $wspace1
+assign [app_id="(?i)waterfox"] $wspace1
+assign [class="(?i)waterfox"] $wspace1
+
+# 2 - terminal
 assign [app_id="Alacritty"] $wspace2
+assign [app_id="termite"] $wspace2
+
+# 3 - editors: Neovim (alacritty --class nvim), Sublime, other text editors
+assign [app_id="^nvim$"] $wspace3
+assign [app_id="^neovide$"] $wspace3
+assign [class="(?i)sublime_text"] $wspace3
+assign [app_id="(?i)sublime_text"] $wspace3
+assign [app_id="^org\.gnome\.(TextEditor|gedit)$"] $wspace3
+assign [app_id="^org\.xfce\.mousepad$"] $wspace3
+assign [app_id="^org\.kde\.kate$"] $wspace3
+assign [app_id="^(code|code-oss)$"] $wspace3
+assign [class="^(Code|code-oss)$"] $wspace3
 assign [class="jetbrains-idea"] $wspace3
-assign [class="Steam"] $wspace4
-assign [class="discord"] $wspace5
-assign [class="firefox"] $wspace8
+# docker nvimcpp / nvimide terminals
+assign [app_id="^docker-nvim"] $wspace3
+
+# 4 - Steam (docker)
+assign [class="(?i)^steam$"] $wspace4
+
+# 5 - Chromium (docker)
+assign [app_id="^chromium$"] $wspace5
+assign [class="^Chromium$"] $wspace5
+
+# 6 - file manager
+assign [app_id="(?i)^pcmanfm"] $wspace6
+assign [class="(?i)^pcmanfm"] $wspace6
+
+# 7 - mail
+assign [app_id="(?i)thunderbird"] $wspace7
+assign [class="(?i)thunderbird"] $wspace7
+assign [app_id="^org\.gnome\.Geary$"] $wspace7
+
+# 8 - Claude: desktop app, or the Claude web app window (docker "claude")
+assign [app_id="(?i)claude"] $wspace8
+assign [class="(?i)claude"] $wspace8
+
+# 9 - chat: Telegram, Discord
 assign [app_id="org.telegram.desktop"] $wspace9
+assign [class="(?i)telegram"] $wspace9
+assign [class="(?i)discord"] $wspace9
+
+# 10 - video editing: Kdenlive (also DaVinci Resolve, Shotcut)
+assign [app_id="^org\.kde\.kdenlive$"] $wspace10
+assign [class="(?i)^resolve$"] $wspace10
+assign [app_id="^org\.shotcut\.Shotcut$"] $wspace10
 
 for_window [app_id="gnome-calculator"] floating enable
-for_window [app_id="pavucontrol"] floating enable
-for_window [app_id="org.pulseaudio.pavucontrol"] floating enable
-for_window [app_id="nm-connection-editor"] floating enable
-for_window [app_id="blueman-manager"] floating enable
-for_window [window_role="pop-up"] floating enable
-for_window [window_role="dialog"] floating enable
 for_window [class="Tor Browser"] floating enable
 for_window [class="VirtualBox Manager"] floating enable
 for_window [class="VirtualBox Machine"] floating enable
-
+for_window [app_id="pavucontrol"] floating enable
+for_window [app_id="org.pulseaudio.pavucontrol"] floating enable
+for_window [app_id="blueman-manager"] floating enable
+for_window [app_id="nm-connection-editor"] floating enable
+# terminal popups started from waybar (network / bluetooth click)
+for_window [app_id="nmtui"] floating enable, resize set 760 520
+for_window [app_id="bluetoothctl"] floating enable, resize set 760 520
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="dialog"] floating enable
 
 # Do not lock / turn off the screen while something is fullscreen (video, game)
 for_window [app_id=".*"] inhibit_idle fullscreen
@@ -216,12 +279,12 @@ for_window [class=".*"] inhibit_idle fullscreen
 
 ##
 # Idle and power saving
-#   4 min  - dim the screen (any input restores brightness)
-#   5 min  - lock
-#   5.5min - screen off
-#   15 min - suspend, only when running on battery
-# Before suspend the screen is always locked.
-# The "eye" button in waybar (idle inhibitor) disables all of this.
+#   4 min   - dim the screen (any input restores brightness)
+#   5 min   - lock
+#   5.5 min - screen off
+#   15 min  - suspend, only when running on battery
+# The screen is always locked before suspend.
+# The eye button in waybar (idle inhibitor) turns all of this off.
 ##
 
 exec swayidle -w \
@@ -236,8 +299,13 @@ exec swayidle -w \
 # Custom autostart
 ##
 
-# notifications (config: ~/.config/mako/config)
+# Hack as the UI font of GTK apps too (file dialogs, pavucontrol, ...)
+exec gsettings set org.gnome.desktop.interface font-name 'Hack 10'
+exec gsettings set org.gnome.desktop.interface monospace-font-name 'Hack 10'
+
+# notifications (settings: ~/.config/mako/config)
 exec mako
+# low battery notifications at 15% and 5%
 exec $Scripts/sway_battery_notify.sh 15 5
 exec ~/.my_scripts/.data/binary/sway_independent_layouts/sway_independent_layouts
 
@@ -251,17 +319,12 @@ bindsym --to-code Ctrl+Shift+space exec makoctl dismiss -a
 bindsym --to-code $mod+Shift+n exec makoctl restore
 bindsym --to-code $mod+n exec $Scripts/sway_dnd_toggle.sh
 
-# lockscreen and suspend
+# lockscreen and suspend (swayidle locks before sleep by itself)
 bindsym --to-code Ctrl+Mod1+Shift+l exec $Locker
-# swayidle locks the screen before sleep by itself
 bindsym --to-code Ctrl+Mod1+Shift+s exec systemctl suspend
 
-# media keys
-# Volume (waybar updates by itself, no signals needed).
-# --locked: keys also work on the lock screen
-bindsym --to-code --locked Ctrl+F3 exec pamixer -i 5 #increase sound volume
-bindsym --to-code --locked Ctrl+F2 exec pamixer -d 5 #decrease sound volume
-bindsym --to-code --locked Ctrl+F1 exec pamixer -t # mute sound
+# media keys (waybar updates by itself, no signals needed)
+# --locked: the keys also work on the lock screen
 bindsym --locked XF86AudioRaiseVolume exec pamixer -i 5
 bindsym --locked XF86AudioLowerVolume exec pamixer -d 5
 bindsym --locked XF86AudioMute exec pamixer -t
@@ -276,7 +339,7 @@ bindsym --locked XF86AudioPlay exec mpc -q toggle
 bindsym --locked XF86AudioPrev exec mpc -q prev
 bindsym --locked XF86AudioNext exec mpc -q next
 
-# Screen brightness controls (5% steps, never fully black)
+# Screen brightness (5% steps, never completely black)
 # Add user to 'video' group
 bindsym --locked XF86MonBrightnessUp exec brightnessctl -q set 5%+
 bindsym --locked XF86MonBrightnessDown exec brightnessctl -q -n1 set 5%-
@@ -293,11 +356,17 @@ bindsym --to-code --release Ctrl+F12 exec $Scripts/sway_make_screenshot.sh -r
 # Get info: swaymsg -t get_outputs
 ##
 
-output "*" background ~/.wallpapers/wallpaper.png fill
-output X11-1 resolution 1920x1080 position 1920,0
+output "*" bg ~/.wallpapers/wallpaper.png fill
+#output X11-1 resolution 1920x1080 position 1920,0
+# Outputs must not overlap: eDP-1 at x=2256 is 2256 px wide (2256..4512),
+# so DP-5 at x=2560 was on top of it. Laptop left, monitor right:
+output eDP-1 resolution 2256x1504 position 0,0
+output DP-5 resolution 2560x1440 position 2256,0
+# Monitor on the left instead? Use: DP-5 position 0,0 / eDP-1 position 2560,0
+# Text too small on the laptop panel? Try: output eDP-1 scale 1.5
 
 input type:touchpad {
-    # tap to click, disable touchpad while typing
+    # tap to click, ignore the touchpad while typing
     tap enabled
     dwt enabled
     #natural_scroll enabled
@@ -305,16 +374,15 @@ input type:touchpad {
 
 input type:keyboard {
     # Enable NumLock on startup
-    xkb_numlock enabled
+    #xkb_numlock enabled
     xkb_layout "us,ru"
-    xkb_options "grp:caps_toggle"
+    xkb_options "grp:win_space_toggle"
 }
 
 
 ##
-# System defaults shipped by the sway package. Among others this exports
-# WAYLAND_DISPLAY/SWAYSOCK to systemd and D-Bus, which is needed for
-# screen sharing (xdg-desktop-portal-wlr), tray apps and notifications.
+# System defaults from the sway package: exports WAYLAND_DISPLAY/SWAYSOCK
+# to systemd and D-Bus (screen sharing, portals, tray apps, notifications)
 ##
 
 include /etc/sway/config.d/*
