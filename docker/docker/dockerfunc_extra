@@ -1,5 +1,5 @@
 # Extra docker apps, used together with ~/.config/docker/dockerfunc.
-# For zsh as well, add to ~/.zshrc:  source $HOME/.config/docker/dockerfunc_extra
+# Loaded by ~/.zshrc as well (nvimcpp, claude in the shell).
 
 # Claude as its own app window (Chromium --app) with a separate profile.
 # Uses your my/chromium image. Window goes to workspace 8.

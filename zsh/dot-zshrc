@@ -147,4 +147,5 @@ fi
 # Added docker calls
 if (( !is_darwin )); then
 	source $HOME/.config/docker/dockerfunc
+	[[ -f $HOME/.config/docker/dockerfunc_extra ]] && source $HOME/.config/docker/dockerfunc_extra
 fi
