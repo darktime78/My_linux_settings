@@ -1,4 +1,21 @@
 # How to install
+## Quick: one script after pacstrap
+On the Arch ISO: partition, mount the root partition on `/mnt` and the EFI partition on
+`/mnt/boot` (BIOS: no EFI partition), then:
+```bash
+# pacstrap -K /mnt base linux linux-firmware
+# curl -LO https://raw.githubusercontent.com/darktime78/My_linux_settings/master/install_arch.sh
+# bash install_arch.sh
+```
+It asks everything first (hostname, user, passwords, timezone, which parts), then installs
+without stopping: fstab, pacman (color, multilib), locale/keymap/timezone, microcode and GPU
+drivers (NVIDIA Pascal/Maxwell such as the MX350 get the 580xx driver from the AUR), bootloader
+(systemd-boot, or GRUB for BIOS / ESP on `/efi`; LUKS, LVM and btrfs are detected), the user with
+sudo, the sway desktop, apps, Docker, yay + AUR packages, and these dotfiles (cloned to
+`~/My_linux_settings`, linked with `makelinks.sh`). Running it again skips what is done.
+Log: `/var/log/install_arch.log`. After the reboot, log in on tty1: sway starts by itself.
+
+## Step by step
 If the line starts with #, you must execute this command as root, if with $, then as the created user.
 ## Arch linux installation
 1) Format the partitions
