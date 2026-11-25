@@ -24,6 +24,8 @@ if (( !is_darwin )); then
 	stow --dotfiles -t "$HOME/.config" sway
 	stow --dotfiles -t "$HOME/.config" mako
 	stow --dotfiles -t "$HOME/.config" rofi
+	stow --dotfiles -t "$HOME/.config" fontconfig
+	stow --dotfiles -t "$HOME/.config" systemd
 fi
 stow --dotfiles -t "$HOME/.config" alacritty
 stow --dotfiles -t "$HOME/.config" oh-my-zsh
